@@ -121,6 +121,7 @@ def plotTwoComponents(var1, var2, plot_begin, plot_end):
 
 def plotThreeComponents(var1, var2, var3, plot_begin, plot_end):
         m = {
+        		"FI": FI_l,
                 "FB": FB_l,
                 "FPD1": FPD1_l,
                 "FPD2": FPD2_l,
