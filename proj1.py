@@ -1,4 +1,5 @@
 import collections
+import copy
 
 #parameters
 Params = collections.namedtuple('Params', ['alpha', 'beta', 'theta', 'Q', 'RIO']);
@@ -8,6 +9,8 @@ Point = collections.namedtuple('Point', ['FI', 'FB', 'FPD2', 'FPD1', 'FPR', 'FOS
 init = Point(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
 
 #handy iterator class
+
+
 
 class FunctionIter:
     x = 0
@@ -115,9 +118,8 @@ def plotTrajectories(plot_begin, plot_end):
 			   xmin = plot_begin,
 			   xmax = plot_end))
 def plotTwoComponents(var1, var2, plot_begin, plot_end):
-	
 	show(list_plot((map(lambda x : (getattr(x, var1), getattr(x, var2)), my_l)[plot_begin: plot_end]), plotjoined = True), axes_labels = ('$'+var1+'$', '$'+var2+'$'))
-
+	
 #plots the output variable after N iterations with the paramaters set to a linear interpolation between startParam
 def plotParamsLinear(startParams, endParams, var, iterationN, paramsN, perVal = 1):
 	vals = []
@@ -135,7 +137,43 @@ def plotParamsLinear(startParams, endParams, var, iterationN, paramsN, perVal = 
 			vals.append(out)
 	
 	plot = list_plot(map(lambda x: ((floor(x/perVal)+0.0)/paramsN, getattr(vals[x], var)), xrange(0, paramsN*perVal)), color = 'blue')
-	#plot = plot + list_plot(map(lambda x: ((floor(x/perVal)+0.0)/paramsN, getattr(vals[x], "RB")), xrange(0, paramsN*perVal)), color = 'green')
 	show(plot)
+
+def plot2DGrayscale(params, param1, param2, param1Range, param2Range, var, iterationN, plotN):
+	matrix = []
+	for i in xrange(0, plotN):
+		row = []
+		for j in xrange(0, plotN):
+			params = copy.copy(params)
+			print(params)
+			setattr(params, param1, (i*param1Range)/plotN)
+			setattr(params, param2, (i*param2Range)/plotN)
+			iterate(iterationN, params)
+			out = getattr(my_l[len(my_l)-1], var)
+			row.append(out)
+		matrix.append(row)
+	
+	show(density_plot(matrix))
+
+def plotMany(paramsIn, range, rangeN):
+	for i in xrange(-rangeN,rangeN):
+		s = i*0.01
+		#set parameters:
+		params = Params(alpha = paramsIn.alpha+s,
+						beta = paramsIn.beta,
+						theta = paramsIn.theta,
+						Q = paramsIn.Q,
+						RIO = paramsIn.RIO #for now, demand is constant
+						)
+		iterate(5000, params)
+
+		#plot parameters
+		plot_begin = 0
+		plot_end = 200
+		
+		plotTwoComponents("FI", "RI", plot_begin, plot_end)
+
+
+
 import IPython
 IPython.embed()
