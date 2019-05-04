@@ -150,7 +150,7 @@ def find_cycle(bound):
     return (len(l),0)
 
 #plots the output variable after N iterations with the paramaters set to a linear interpolation between startParam
-def plotParamsLinear(startParams, endParams, var, iterationN, paramsN):
+def plotParamsLinear(startParams, endParams, var, iterationN, paramsN, perVal = 1):
 	vals = []
 	for i in xrange(0, paramsN):
 		s = (i+0.0)/paramsN
@@ -160,10 +160,13 @@ def plotParamsLinear(startParams, endParams, var, iterationN, paramsN):
 						startParams.Q*(1-s) + endParams.Q*(s),
 						startParams.RIO*(1-s) + endParams.RIO*(s))
 		iterate(iterationN, params)
-		out = getattr(my_l[len(my_l)-1], var)
-		vals.append(out)
-		print(out)
-        show(list_plot(map(lambda x: ((x+0.0)/paramsN, vals[x]), xrange(0, paramsN))))
+		for i2 in xrange(-perVal, 0):
+			
+			out = my_l[len(my_l)-1+i2]
+			vals.append(out)
+	
+	plot = list_plot(map(lambda x: ((floor(x/perVal)+0.0)/paramsN, getattr(vals[x], var)), xrange(0, paramsN*perVal)), color = 'blue')
+	show(plot)
 
 import IPython
 IPython.embed()
