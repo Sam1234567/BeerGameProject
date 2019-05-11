@@ -33,37 +33,41 @@ class FunctionIter:
 
 
 my_l = [];
+
+def do_beer_game(x, params):
+	_FI = max(0,x.FI + x.FPD2 - x.FB - x.FIO)
+	_FB = max(0,x.FB + x.FIO - x.FI - x.FPD2)
+	_FED = params.theta*x.FIO + (1-params.theta)*x.FED
+	_FSL = x.FPR + x.FPD1 #FSL_n = FPD1_n + FPD2_n = FPR_n-1 + FPD1_n-1
+	_FOS = min(x.FI + x.FPD2, x.FB + x.FIO)
+	_RI = max(0,x.RI + x.RIS - x.RB - params.RIO)
+	_RB = max(0,x.RB + params.RIO - x.RI - x.RIS)
+	_RED = params.theta*x.RIO + (1-params.theta)*x.RED
+	_RSL = x.FOS + x.ROP + _FB + _FOS #RSL_n = RIS_n + FIO_n + FB_n + FOS_n = FOS_n-1 + ROP_n-1 + FB_n + FOS_n
+	return Point(FI = _FI,
+				 FB = _FB,
+				 FPD2 = x.FPD1,
+				 FPD1 = x.FPR,
+				 FPR = max(0,_FED + params.alpha*(params.Q - _FI + _FB - params.beta*_FSL)),
+				 FOS = _FOS,
+				 FIO = x.ROP,
+				 FED = _FED,
+				 FSL = _FSL,
+				 RI = _RI,
+				 RB = _RB,
+				 RIS = x.FOS,
+				 RIO = params.RIO,
+				 RED = _RED,
+				 ROP = max(0,_RED + params.alpha*(params.Q - _RI + _RB - params.beta*_RSL)),
+				 RSL = _RSL)
+
 #params: theta, beta, Q, alpha
 def iterate(N, params):
 	
-	def do_beer_game(x):
-		_FI = max(0,x.FI + x.FPD2 - x.FB - x.FIO)
-		_FB = max(0,x.FB + x.FIO - x.FI - x.FPD2)
-		_FED = params.theta*x.FIO + (1-params.theta)*x.FED
-		_FSL = x.FPR + x.FPD1 #FSL_n = FPD1_n + FPD2_n = FPR_n-1 + FPD1_n-1
-		_FOS = min(x.FI + x.FPD2, x.FB + x.FIO)
-		_RI = max(0,x.RI + x.RIS - x.RB - params.RIO)
-		_RB = max(0,x.RB + params.RIO - x.RI - x.RIS)
-		_RED = params.theta*x.RIO + (1-params.theta)*x.RED
-		_RSL = x.FOS + x.ROP + _FB + _FOS #RSL_n = RIS_n + FIO_n + FB_n + FOS_n = FOS_n-1 + ROP_n-1 + FB_n + FOS_n
-		return Point(FI = _FI,
-					 FB = _FB,
-					 FPD2 = x.FPD1,
-					 FPD1 = x.FPR,
-					 FPR = max(0,_FED + params.alpha*(params.Q - _FI + _FB - params.beta*_FSL)),
-					 FOS = _FOS,
-					 FIO = x.ROP,
-					 FED = _FED,
-					 FSL = _FSL,
-					 RI = _RI,
-					 RB = _RB,
-					 RIS = x.FOS,
-					 RIO = params.RIO,
-					 RED = _RED,
-					 ROP = max(0,_RED + params.alpha*(params.Q - _RI + _RB - params.beta*_RSL)),
-					 RSL = _RSL)
+	def do_beer_game_with_params(x):
+		return do_beer_game(x, params)
 	global my_l
-	my_l = list(FunctionIter(init,do_beer_game,N,1))
+	my_l = list(FunctionIter(init,do_beer_game_with_params,N,1))
 	
 FI_l = lambda x: my_l[floor(x)+1].FI*(x - floor(x)) + my_l[floor(x)].FI*(1-x+floor(x))
 FB_l = lambda x: my_l[floor(x)+1].FB*(x - floor(x)) + my_l[floor(x)].FB*(1-x+floor(x))
@@ -170,6 +174,58 @@ def plotParamsLinear(startParams, endParams, var, iterationN, paramsN, perVal = 
 	
 	plot = list_plot(map(lambda x: ((floor(x/perVal)+0.0)/paramsN, getattr(vals[x], var)), xrange(0, paramsN*perVal)), color = 'blue', size = 1)
 	show(plot)
+	
+class Object(object):
+	pass
+
+def plot2DGrayscale(params, param1, param2, param1Range, param2Range, var, iterationN, plotN):
+	matrix = []
+	def f(x,y):
+		paramsTemp = Object()
+		paramsTemp.alpha = params.alpha
+		paramsTemp.beta = params.beta
+		paramsTemp.theta = params.theta
+		paramsTemp.Q = params.Q
+		paramsTemp.RIO = params.RIO
+		setattr(paramsTemp, param1, x)
+		setattr(paramsTemp, param2, y)
+		iterate(iterationN, paramsTemp)
+		out = getattr(my_l[len(my_l)-1], var)
+		return out
+	
+	 show(density_plot(f, (getattr(params, param1),getattr(params, param1)+param1Range), (getattr(params, param2),getattr(params, param2)+param2Range), cmap='jet', plot_points = plotN))
+
+#for animation 
+matrix = []
+
+class MatrixPoint:
+	val
+	params
+	def __init__(self, val, params):
+		self.val = val
+		self.params = params
+
+def do_beer_game_on_matrix(matrix,
+
+def animation(params, param1, param2, param1Range, param2Range, var, iterationN, animN, plotN):
+	global matrix
+	matrix = []
+	for i in xrange(0, param1Range):
+		row = []
+		for j in xranfe(0, param2Range):
+			paramsTemp = Object()
+			paramsTemp.alpha = params.alpha
+			paramsTemp.beta = params.beta
+			paramsTemp.theta = params.theta
+			paramsTemp.Q = params.Q
+			paramsTemp.RIO = params.RIO
+			setattr(paramsTemp, param1, x)
+			setattr(paramsTemp, param2, y)
+			iterate(iterationN, paramsTemp)
+			out = getattr(my_l[len(my_l)-1], var)
+	
+	
+	 density_plot(f, (getattr(params, param1),getattr(params, param1)+param1Range), (getattr(params, param2),getattr(params, param2)+param2Range), cmap='jet', plot_points = plotN).save
 
 import IPython
 IPython.embed()
