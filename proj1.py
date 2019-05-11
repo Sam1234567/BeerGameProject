@@ -139,15 +139,18 @@ def plotThreeComponents(var1, var2, var3, plot_begin, plot_end):
                 }
 	show(parametric_plot3d([m[var1],m[var2],m[var3]],(plot_begin,plot_end),axes_labels=('$'+var1+'$','$'+var2+'$','$'+var3+'$')))
 
-def find_cycle(bound):
-    l = map(lambda i: (vector((FB_l(i),FPD1_l(i),FPD2_l(i),FPR_l(i),FOS_l(i),FIO_l(i),FED_l(i),FSL_l(i),RI_l(i),RB_l(i),RIS_l(i),RED_l(i),ROP_l(i),RSL_l(i)))), list([0,len(my_l)-2]))
-    for diff in range(1,len(l)/2):
-        if (l[len(l) - 1] - l[len(l) - diff - 1]).norm() < bound:
-            #find the first occurance of an element that is near enough to s1
-            for k in l:
-                if (k - l[len(l) - 1]).norm() < bound:
-                    return (diff,l.index(k))
-    return (len(l),0)
+def cycle_test(period_len, search_start):
+    # outputs a value representing the average difference between values that are period_len apart in the list, scaled by the average size of all values in the list
+    # return values closer to 0 mean that the list is almost exactly period_len-periodic
+    l = map(lambda i: (vector((FB_l(i),FPD1_l(i),FPD2_l(i),FPR_l(i),FOS_l(i),FIO_l(i),FED_l(i),FSL_l(i),RI_l(i),RB_l(i),RIS_l(i),RED_l(i),ROP_l(i),RSL_l(i)))), list(range(search_start,len(my_l)-2)))
+    size_sum = 0
+    diff_sum = 0
+    for diff in range(0,period_len):
+        for i in range(1,len(l)/period_len):
+            x = (l[period_len*(i-1) + diff] - l[period_len*i + diff]).norm()
+            size_sum += l[period_len*(i-1)+diff].norm()
+            diff_sum += x
+    return diff_sum/size_sum #(average diff)/(average size) = (diff_sum/len)/(size_sum/len) = diff_sum/size_sum
 
 #plots the output variable after N iterations with the paramaters set to a linear interpolation between startParam
 def plotParamsLinear(startParams, endParams, var, iterationN, paramsN, perVal = 1):
@@ -165,7 +168,7 @@ def plotParamsLinear(startParams, endParams, var, iterationN, paramsN, perVal = 
 			out = my_l[len(my_l)-1+i2]
 			vals.append(out)
 	
-	plot = list_plot(map(lambda x: ((floor(x/perVal)+0.0)/paramsN, getattr(vals[x], var)), xrange(0, paramsN*perVal)), color = 'blue')
+	plot = list_plot(map(lambda x: ((floor(x/perVal)+0.0)/paramsN, getattr(vals[x], var)), xrange(0, paramsN*perVal)), color = 'blue', size = 1)
 	show(plot)
 
 import IPython
