@@ -1,3 +1,47 @@
+% Example LaTeX document for GP111 - note % sign indicates a comment
+
+
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{color}
+\graphicspath{ {./images/} }
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\usepackage{listings}
+
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+\graphicspath{ {./images/} }
+% Default margins are too wide all the way around. I reset them here
+\setlength{\topmargin}{-.5in}
+\setlength{\textheight}{9in}
+\setlength{\oddsidemargin}{.125in}
+\setlength{\textwidth}{6.25in}
+\begin{document}
+\title{Beer Game Part-1}
+\author{Sam Reifenstein, Koji Sunami, Jack McKee}
+\renewcommand{\today}{April 26, 2019}
+\maketitle
+\section*{Code}
+Here is our code, written in SageMath:
+\begin{lstlisting}
 import collections
 
 #parameters
@@ -218,3 +262,45 @@ def animation(params, param1, param2, param1Range, param2Range, var, iterationN,
 
 import IPython
 IPython.embed()
+
+\end{lstlisting}
+
+\section*{Example 1, Using the plotParamsLinear function}
+The "plotParamsLinear" function takes in two parameter values and plots the behavior of the system with parameter values in between the two input parameter values using linear interpolation.
+The X-axis of this plot is the coefficient used to combine the two input parameters (ex. at 0.0 we have the first parameter at 1.0 we have the second and at 0.5 we have the average of the two).
+The Y-axis plots the last 50 values of the variable "FB" after 400 iterations with the given parameter values (in the example shown below). 
+This plot allows us to roughly tell weather the system has a periodic attractor or chaos based on the last 50 values and how this changes for different parameters.
+In the plot below you can see the system switching from a periodic attractor to chaos and back multiple times as Alpha is varied (the other parameters are held constant in this plot).
+There doesn't seem to be any period doubling like with the logistic map as it seems to instantly transition to chaos but it might just be too small to see.
+\linebreak
+Code:
+\begin{lstlisting}
+plotParamsLinear(Params(alpha = 0.5,beta = 0.5,theta = 0.5,Q = 0.6,RIO =5) , Params(alpha = 1.5, beta = 0.5, theta = 0.5, Q = 0.6, RIO = 5), "FB", 1000, 400,50)
+\end{lstlisting}
+Output:
+\linebreak
+\includegraphics[scale=1.0]{example3_1.png}
+\section*{Example 2, Using the plot2DGrayScale function}
+I don't know why I called this function "grayscale" because it actually plots in color. 
+
+This function is similar to the plotParamsLinear function as it plots a value of the system after a certain number of iterations vs. the paramaters used.
+With this function the X and Y axis are two different parameter values that are chosen (here we have 'alpha' and 'beta') and a range for them to be plotted over.
+The color of the plot at each point represents the value of a certain variable (in this case "FI") after a certain amount of iterations with the hotter colors 
+being larger values and the cooler colors being smaller (sage automatically scales it so the lowest value is blue and the highest is red).
+This function is kind of hard to experiment with as it will take a while to process if you want a quality image but you can get some pretty interesting pictures.
+I noticed a lot of them look like clouds which maybe is related to the fact that weather also has chaotic behavior.
+\linebreak
+Code:
+\begin{lstlisting}
+plot2DGrayscale(Params(alpha = 0.40,
+           			    beta = 0.0,
+						theta = 0.2,
+						Q = 0.3,
+						RIO = 5 #for now, demand is constant
+						),'alpha', 'beta', 0.4,0.8, "FI", 210, 100)
+\end{lstlisting}
+Output:
+\linebreak
+\includegraphics[scale=1.0]{example4_1.png}
+
+\end{document}
